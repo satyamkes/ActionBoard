@@ -1,6 +1,6 @@
 [build]
   command = "npm run build"
-  publish = "build" # or "dist" if using Vite
+  publish = "dist"
 
 [[redirects]]
   from = "/*"
