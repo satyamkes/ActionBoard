@@ -463,11 +463,8 @@ export default function TodoApp() {
                   
                 </div>
                 ActionBoard
-                {productivityScore > 80 && (
-                  <span className="text-xs bg-amber-500 text-amber-900 px-2 py-1 rounded-full ml-2 flex items-center gap-1">
-                    <Trophy size={12} /> Pro
-                  </span>
-                )}
+              
+
               </h1>
               <p className={subtextClass}>Advanced task management with time tracking</p>
             </div>
@@ -522,8 +519,8 @@ export default function TodoApp() {
               <div className={`text-2xl font-semibold ${textClass}`}>
                 {productivityScore}%
               </div>
-              <div className={`text-sm ${subtextClass}`}>Productivity</div>
-            </div>
+              <div className={`text-sm ${subtextClass}`}>Productivit
+                
           </div>
           
 
@@ -1228,10 +1225,10 @@ export default function TodoApp() {
               <div>
                 <h3 className={`font-medium ${textClass} mb-3`}>About</h3>
                 <p className={`text-sm ${subtextClass} mb-4`}>
-                  Productivity Pro v1.0.0
+                  ActionBoard v1.0.0
                 </p>
                 <p className={`text-sm ${subtextClass}`}>
-                  Designed and built with ❤️
+                  Designed by SK
                 </p>
               </div>
             </div>
