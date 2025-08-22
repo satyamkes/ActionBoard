@@ -33,6 +33,18 @@ export default function TodoApp() {
   const [selectedTags, setSelectedTags] = useState([]);
   const [showTagManager, setShowTagManager] = useState(false);
   const [newTag, setNewTag] = useState('');
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
+
+  // Check screen size on resize
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const categories = [
     { id: 'work', name: 'Work', color: 'bg-blue-500', icon: <BarChart3 size={16} /> },
@@ -64,7 +76,6 @@ export default function TodoApp() {
     "The harder you work for something, the greater you'll feel when you achieve it.",
     "Don't count the days, make the days count."
   ];
-
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -431,7 +442,7 @@ export default function TodoApp() {
   const motivationalQuote = motivationalQuotes[Math.floor(Math.random() * motivationalQuotes.length)];
 
   return (
-    <div className={`min-h-screen ${themeClass} p-6 transition-colors duration-300 relative overflow-hidden`}>
+    <div className={`min-h-screen ${themeClass} p-4 md:p-6 transition-colors duration-300 relative overflow-hidden`}>
      
       <div className="absolute inset-0 opacity-20 pointer-events-none">
         <div className="absolute top-0 left-0 w-full h-full">
@@ -454,87 +465,156 @@ export default function TodoApp() {
 
       <div className="max-w-7xl mx-auto relative z-10">
         
-   
-        <div className={`${cardClass} rounded-xl shadow-lg border p-8 mb-6 backdrop-blur-sm`}>
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h1 className={`text-3xl font-semibold ${textClass} mb-2 flex items-center gap-3`}>
-                <div className="w-10 h-10 rounded-lg flex items-center justify-center">
-                  
-                </div>
-                ActionBoard
+        {/* Mobile menu button */}
+        {isMobile && (
+          <button
+            onClick={() => setShowMobileMenu(!showMobileMenu)}
+            className={`fixed top-4 right-4 z-50 p-2 rounded-lg ${buttonClass} shadow-lg`}
+          >
+            {showMobileMenu ? <X size={24} /> : <MoreHorizontal size={24} />}
+          </button>
+        )}
+        
+        {/* Mobile menu */}
+        {isMobile && showMobileMenu && (
+          <div className={`fixed inset-0 z-40 ${darkMode ? 'bg-slate-900' : 'bg-white'} p-6`}>
+            <div className="flex flex-col h-full">
+              <div className="flex justify-between items-center mb-8">
+                <h1 className={`text-2xl font-semibold ${textClass}`}>ActionBoard</h1>
+                <button onClick={() => setShowMobileMenu(false)} className={subtextClass}>
+                  <X size={24} />
+                </button>
+              </div>
               
-
-              </h1>
-              <p className={subtextClass}>Advanced task management with time tracking</p>
-            </div>
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2">
-                <div className="text-right mr-4">
-                  <div className={`text-2xl font-mono font-medium ${textClass}`}>
-                    {formatCurrentTime()}
-                  </div>
-                  <div className={`${subtextClass} text-sm`}>
-                    {currentTime.toLocaleDateString('en-US', { 
-                      weekday: 'long', 
-                      month: 'short', 
-                      day: 'numeric' 
-                    })}
-                  </div>
-                </div>
+              <div className="flex flex-col gap-4 mb-8">
                 <button
-                  onClick={() => setDarkMode(!darkMode)}
-                  className={`p-3 rounded-lg transition-colors duration-200 ${buttonClass}`}
+                  onClick={() => setShowPomodoro(!showPomodoro)}
+                  className={`p-3 rounded-lg text-left flex items-center gap-3 ${buttonClass}`}
                 >
-                  {darkMode ? <Sun size={20} /> : <Moon size={20} />}
+                  <Clock4 size={20} />
+                  Pomodoro Timer
                 </button>
                 <button
-                  onClick={() => setShowSettings(!showSettings)}
-                  className={`p-3 rounded-lg transition-colors duration-200 ${buttonClass}`}
+                  onClick={() => setShowAnalytics(!showAnalytics)}
+                  className={`p-3 rounded-lg text-left flex items-center gap-3 ${buttonClass}`}
+                >
+                  <PieChart size={20} />
+                  Analytics
+                </button>
+                <button
+                  onClick={() => setShowCategories(!showCategories)}
+                  className={`p-3 rounded-lg text-left flex items-center gap-3 ${buttonClass}`}
+                >
+                  <FolderOpen size={20} />
+                  Categories
+                </button>
+                <button
+                  onClick={() => setShowSettings(true)}
+                  className={`p-3 rounded-lg text-left flex items-center gap-3 ${buttonClass}`}
                 >
                   <Settings size={20} />
+                  Settings
+                </button>
+              </div>
+              
+              <div className="mt-auto">
+                <button
+                  onClick={() => setDarkMode(!darkMode)}
+                  className={`w-full p-3 rounded-lg mb-3 flex items-center justify-between ${buttonClass}`}
+                >
+                  <span>{darkMode ? 'Light Mode' : 'Dark Mode'}</span>
+                  {darkMode ? <Sun size={20} /> : <Moon size={20} />}
                 </button>
               </div>
             </div>
           </div>
+        )}
+   
+        <div className={`${cardClass} rounded-xl shadow-lg border p-4 md:p-6 lg:p-8 mb-6 backdrop-blur-sm`}>
+          <div className="flex flex-col md:flex-row md:items-center justify-between mb-6">
+            <div className="mb-4 md:mb-0">
+              <h1 className={`text-2xl md:text-3xl font-semibold ${textClass} mb-2 flex items-center gap-3`}>
+                <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg flex items-center justify-center">
+                  
+                </div>
+                ActionBoard
+                {productivityScore > 80 && (
+                  <span className="text-xs bg-amber-500 text-amber-900 px-2 py-1 rounded-full ml-2 flex items-center gap-1">
+                    <Trophy size={12} /> 
+                  </span>
+                )}
+              </h1>
+              <p className={`${subtextClass} text-sm md:text-base`}>Advanced task management with time tracking</p>
+            </div>
+            <div className="flex items-center gap-2 md:gap-4">
+              {!isMobile && (
+                <>
+                  <div className="text-right mr-2 md:mr-4">
+                    <div className={`text-xl md:text-2xl font-mono font-medium ${textClass}`}>
+                      {formatCurrentTime()}
+                    </div>
+                    <div className={`${subtextClass} text-xs md:text-sm`}>
+                      {currentTime.toLocaleDateString('en-US', { 
+                        weekday: isMobile ? 'short' : 'long', 
+                        month: 'short', 
+                        day: 'numeric' 
+                      })}
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setDarkMode(!darkMode)}
+                    className={`p-2 md:p-3 rounded-lg transition-colors duration-200 ${buttonClass}`}
+                  >
+                    {darkMode ? <Sun size={18} /> : <Moon size={18} />}
+                  </button>
+                  <button
+                    onClick={() => setShowSettings(!showSettings)}
+                    className={`p-2 md:p-3 rounded-lg transition-colors duration-200 ${buttonClass}`}
+                  >
+                    <Settings size={18} />
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
 
-          <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
-            <div className={`${darkMode ? 'bg-slate-700/50' : 'bg-slate-50'} rounded-lg p-4 text-center transition-all duration-200 hover:scale-105`}>
-              <div className={`text-2xl font-semibold ${textClass}`}>{tasks.filter(t => !t.completed && !t.archived).length}</div>
-              <div className={`text-sm ${subtextClass}`}>Active Tasks</div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4 mb-6 md:mb-8">
+            <div className={`${darkMode ? 'bg-slate-700/50' : 'bg-slate-50'} rounded-lg p-3 md:p-4 text-center transition-all duration-200 hover:scale-105`}>
+              <div className={`text-lg md:text-xl lg:text-2xl font-semibold ${textClass}`}>{tasks.filter(t => !t.completed && !t.archived).length}</div>
+              <div className={`text-xs md:text-sm ${subtextClass}`}>Active Tasks</div>
             </div>
-            <div className={`${darkMode ? 'bg-slate-700/50' : 'bg-slate-50'} rounded-lg p-4 text-center transition-all duration-200 hover:scale-105`}>
-              <div className={`text-2xl font-semibold ${textClass}`}>{completedCount}</div>
-              <div className={`text-sm ${subtextClass}`}>Completed</div>
+            <div className={`${darkMode ? 'bg-slate-700/50' : 'bg-slate-50'} rounded-lg p-3 md:p-4 text-center transition-all duration-200 hover:scale-105`}>
+              <div className={`text-lg md:text-xl lg:text-2xl font-semibold ${textClass}`}>{completedCount}</div>
+              <div className={`text-xs md:text-sm ${subtextClass}`}>Completed</div>
             </div>
-            <div className={`${darkMode ? 'bg-slate-700/50' : 'bg-slate-50'} rounded-lg p-4 text-center transition-all duration-200 hover:scale-105`}>
-              <div className={`text-2xl font-semibold ${textClass}`}>{starredCount}</div>
-              <div className={`text-sm ${subtextClass}`}>Starred</div>
+            <div className={`${darkMode ? 'bg-slate-700/50' : 'bg-slate-50'} rounded-lg p-3 md:p-4 text-center transition-all duration-200 hover:scale-105`}>
+              <div className={`text-lg md:text-xl lg:text-2xl font-semibold ${textClass}`}>{starredCount}</div>
+              <div className={`text-xs md:text-sm ${subtextClass}`}>Starred</div>
             </div>
-            <div className={`${darkMode ? 'bg-slate-700/50' : 'bg-slate-50'} rounded-lg p-4 text-center transition-all duration-200 hover:scale-105`}>
-              <div className={`text-2xl font-mono font-semibold ${textClass}`}>{formatTime(totalTimeSpent)}</div>
-              <div className={`text-sm ${subtextClass}`}>Time Spent</div>
+            <div className={`${darkMode ? 'bg-slate-700/50' : 'bg-slate-50'} rounded-lg p-3 md:p-4 text-center transition-all duration-200 hover:scale-105`}>
+              <div className={`text-lg md:text-xl lg:text-2xl font-mono font-semibold ${textClass}`}>{formatTime(totalTimeSpent)}</div>
+              <div className={`text-xs md:text-sm ${subtextClass}`}>Time Spent</div>
             </div>
-            <div className={`${darkMode ? 'bg-slate-700/50' : 'bg-slate-50'} rounded-lg p-4 text-center transition-all duration-200 hover:scale-105`}>
-              <div className={`text-2xl font-semibold ${textClass}`}>
+            <div className={`${darkMode ? 'bg-slate-700/50' : 'bg-slate-50'} rounded-lg p-3 md:p-4 text-center transition-all duration-200 hover:scale-105`}>
+              <div className={`text-lg md:text-xl lg:text-2xl font-semibold ${textClass}`}>
                 {productivityScore}%
               </div>
-              <div className={`text-sm ${subtextClass}`}>Productivit
-                
+              <div className={`text-xs md:text-sm ${subtextClass}`}>Productivity</div>
+            </div>
           </div>
           
 
           {totalCount > 0 && (
-            <div className="mb-8">
+            <div className="mb-6 md:mb-8">
               <div className="flex justify-between items-center mb-2">
-                <span className={subtextClass}>Task Completion Progress</span>
-                <span className={`font-medium ${textClass}`}>
+                <span className={`${subtextClass} text-sm md:text-base`}>Task Completion Progress</span>
+                <span className={`font-medium ${textClass} text-sm md:text-base`}>
                   {completedCount}/{totalCount} ({Math.round((completedCount / totalCount) * 100)}%)
                 </span>
               </div>
-              <div className={`w-full ${darkMode ? 'bg-slate-700' : 'bg-slate-200'} rounded-full h-3 overflow-hidden`}>
+              <div className={`w-full ${darkMode ? 'bg-slate-700' : 'bg-slate-200'} rounded-full h-2 md:h-3 overflow-hidden`}>
                 <div 
-                  className="bg-gradient-to-r from-blue-500 to-indigo-600 h-3 rounded-full transition-all duration-500 relative"
+                  className="bg-gradient-to-r from-blue-500 to-indigo-600 h-2 md:h-3 rounded-full transition-all duration-500 relative"
                   style={{ width: `${(completedCount / totalCount) * 100}%` }}
                 >
                   <div className="absolute inset-0 bg-white/20 animate-pulse"></div>
@@ -544,11 +624,11 @@ export default function TodoApp() {
           )}
        
           {showMotivational && (
-            <div className={`${darkMode ? 'bg-slate-700/50 border-slate-600' : 'bg-blue-50 border-blue-200'} border rounded-lg p-4 mb-6 transition-all duration-300`}>
+            <div className={`${darkMode ? 'bg-slate-700/50 border-slate-600' : 'bg-blue-50 border-blue-200'} border rounded-lg p-3 md:p-4 mb-6 transition-all duration-300`}>
               <div className="flex items-start gap-3">
-                <Lightbulb size={20} className={`mt-0.5 ${darkMode ? 'text-blue-400' : 'text-blue-500'}`} />
+                <Lightbulb size={18} className={`mt-0.5 ${darkMode ? 'text-blue-400' : 'text-blue-500'}`} />
                 <div>
-                  <p className={`${darkMode ? 'text-blue-300' : 'text-blue-700'} text-sm italic`}>
+                  <p className={`${darkMode ? 'text-blue-300' : 'text-blue-700'} text-xs md:text-sm italic`}>
                     "{motivationalQuote}"
                   </p>
                 </div>
@@ -556,21 +636,21 @@ export default function TodoApp() {
                   onClick={() => setShowMotivational(false)}
                   className={`ml-auto p-1 rounded-full ${darkMode ? 'hover:bg-slate-600' : 'hover:bg-blue-100'}`}
                 >
-                  <X size={16} className={subtextClass} />
+                  <X size={14} className={subtextClass} />
                 </button>
               </div>
             </div>
           )}
       
           {activeTask && (
-            <div className={`${darkMode ? 'bg-slate-700/70 border-slate-600' : 'bg-slate-100 border-slate-300'} border rounded-lg p-4 mb-6 transition-all duration-300`}>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-3 h-3 bg-blue-500 rounded-full animate-pulse"></div>
-                  <span className={`${subtextClass} font-medium`}>Currently working on:</span>
-                  <span className={`${textClass} font-semibold`}>{activeTask.text}</span>
+            <div className={`${darkMode ? 'bg-slate-700/70 border-slate-600' : 'bg-slate-100 border-slate-300'} border rounded-lg p-3 md:p-4 mb-6 transition-all duration-300`}>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div className="flex items-center gap-2 md:gap-3">
+                  <div className="w-2 h-2 md:w-3 md:h-3 bg-blue-500 rounded-full animate-pulse"></div>
+                  <span className={`${subtextClass} font-medium text-sm`}>Currently working on:</span>
+                  <span className={`${textClass} font-semibold text-sm md:text-base truncate`}>{activeTask.text}</span>
                 </div>
-                <div className={`text-xl font-mono font-semibold ${textClass}`}>
+                <div className={`text-lg md:text-xl font-mono font-semibold ${textClass}`}>
                   {formatTime(activeTask.timeSpent || 0)}
                 </div>
               </div>
@@ -578,95 +658,99 @@ export default function TodoApp() {
           )}
           
 
-          <div className="flex flex-col lg:flex-row gap-4 mb-6">
-     
-            <div className="flex-1 relative">
-              <Search size={20} className={`absolute left-3 top-3.5 ${subtextClass}`} />
-              <input
-                type="text"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Search tasks..."
-                className={`w-full pl-12 pr-4 py-3 border ${
+          <div className="flex flex-col gap-3 md:gap-4 mb-6">
+            {/* Search and filters */}
+            <div className="flex flex-col md:flex-row gap-3 md:gap-4">
+              <div className="flex-1 relative">
+                <Search size={18} className={`absolute left-3 top-3 ${subtextClass}`} />
+                <input
+                  type="text"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Search tasks..."
+                  className={`w-full pl-10 pr-4 py-2 md:py-3 border ${
+                    darkMode 
+                      ? 'bg-slate-700 border-slate-600 text-slate-200 placeholder-slate-400' 
+                      : 'bg-white border-slate-300 text-slate-800 placeholder-slate-500'
+                  } rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200`}
+                />
+              </div>
+           
+              <select
+                value={filter}
+                onChange={(e) => setFilter(e.target.value)}
+                className={`px-3 md:px-4 py-2 md:py-3 border ${
                   darkMode 
-                    ? 'bg-slate-700 border-slate-600 text-slate-200 placeholder-slate-400' 
-                    : 'bg-white border-slate-300 text-slate-800 placeholder-slate-500'
-                } rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200`}
-              />
-            </div>
-         
-            <select
-              value={filter}
-              onChange={(e) => setFilter(e.target.value)}
-              className={`px-4 py-3 border ${
-                darkMode 
-                  ? 'bg-slate-700 border-slate-600 text-slate-200' 
-                  : 'bg-white border-slate-300 text-slate-800'
-              } rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200`}
-            >
-              <option value="all">All Tasks</option>
-              <option value="active">Active</option>
-              <option value="completed">Completed</option>
-              <option value="starred">Starred</option>
-            </select>
-            
-            <div className="flex gap-1 p-1 rounded-lg bg-slate-100 dark:bg-slate-700">
-              <button
-                onClick={() => setViewMode('list')}
-                className={`p-2 rounded-md transition-colors ${viewMode === 'list' ? 'bg-white dark:bg-slate-600 shadow-sm' : ''}`}
+                    ? 'bg-slate-700 border-slate-600 text-slate-200' 
+                    : 'bg-white border-slate-300 text-slate-800'
+                } rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200`}
               >
-                <List size={18} className={subtextClass} />
-              </button>
-              <button
-                onClick={() => setViewMode('grid')}
-                className={`p-2 rounded-md transition-colors ${viewMode === 'grid' ? 'bg-white dark:bg-slate-600 shadow-sm' : ''}`}
-              >
-                <Grid size={18} className={subtextClass} />
-              </button>
+                <option value="all">All Tasks</option>
+                <option value="active">Active</option>
+                <option value="completed">Completed</option>
+                <option value="starred">Starred</option>
+              </select>
+              
+              <div className="flex gap-1 p-1 rounded-lg bg-slate-100 dark:bg-slate-700 self-start">
+                <button
+                  onClick={() => setViewMode('list')}
+                  className={`p-1 md:p-2 rounded-md transition-colors ${viewMode === 'list' ? 'bg-white dark:bg-slate-600 shadow-sm' : ''}`}
+                >
+                  <List size={16} className={subtextClass} />
+                </button>
+                <button
+                  onClick={() => setViewMode('grid')}
+                  className={`p-1 md:p-2 rounded-md transition-colors ${viewMode === 'grid' ? 'bg-white dark:bg-slate-600 shadow-sm' : ''}`}
+                >
+                  <Grid size={16} className={subtextClass} />
+                </button>
+              </div>
             </div>
             
-            <div className="flex gap-2">
-              <button
-                onClick={exportTasks}
-                className={`px-4 py-3 ${buttonClass} rounded-lg transition-colors duration-200 flex items-center gap-2`}
-              >
-                <Download size={20} />
-                Export
-              </button>
-              <label className={`px-4 py-3 ${buttonClass} rounded-lg transition-colors duration-200 flex items-center gap-2 cursor-pointer`}>
-                <Upload size={20} />
-                Import
-                <input type="file" accept=".json" onChange={importTasks} className="hidden" />
-              </label>
-            </div>
-          </div>
-          
-          <div className="flex flex-wrap gap-2 mb-6">
-            {tags.slice(0, 5).map(tag => (
-              <button
-                key={tag}
-                onClick={() => setSelectedTags(prev => 
-                  prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]
+            <div className="flex flex-col sm:flex-row gap-2">
+              <div className="flex flex-wrap gap-2">
+                {tags.slice(0, isMobile ? 3 : 5).map(tag => (
+                  <button
+                    key={tag}
+                    onClick={() => setSelectedTags(prev => 
+                      prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]
+                    )}
+                    className={`px-2 py-1 rounded-full text-xs flex items-center gap-1 transition-all ${
+                      selectedTags.includes(tag)
+                        ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
+                        : 'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300'
+                    }`}
+                  >
+                    <Tag size={12} />
+                    {tag}
+                    {selectedTags.includes(tag) && <X size={12} />}
+                  </button>
+                ))}
+                {tags.length > (isMobile ? 3 : 5) && (
+                  <button
+                    onClick={() => setShowTagManager(!showTagManager)}
+                    className={`px-2 py-1 rounded-full text-xs ${buttonClass}`}
+                  >
+                    +{tags.length - (isMobile ? 3 : 5)} more
+                  </button>
                 )}
-                className={`px-3 py-1 rounded-full text-sm flex items-center gap-1 transition-all ${
-                  selectedTags.includes(tag)
-                    ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
-                    : 'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300'
-                }`}
-              >
-                <Tag size={14} />
-                {tag}
-                {selectedTags.includes(tag) && <X size={14} />}
-              </button>
-            ))}
-            {tags.length > 5 && (
-              <button
-                onClick={() => setShowTagManager(!showTagManager)}
-                className={`px-3 py-1 rounded-full text-sm ${buttonClass}`}
-              >
-                +{tags.length - 5} more
-              </button>
-            )}
+              </div>
+              
+              <div className="flex gap-2 ml-auto">
+                <button
+                  onClick={exportTasks}
+                  className={`px-3 py-2 ${buttonClass} rounded-lg transition-colors duration-200 flex items-center gap-2 text-xs md:text-sm`}
+                >
+                  <Download size={16} />
+                  <span className="hidden sm:inline">Export</span>
+                </button>
+                <label className={`px-3 py-2 ${buttonClass} rounded-lg transition-colors duration-200 flex items-center gap-2 text-xs md:text-sm cursor-pointer`}>
+                  <Upload size={16} />
+                  <span className="hidden sm:inline">Import</span>
+                  <input type="file" accept=".json" onChange={importTasks} className="hidden" />
+                </label>
+              </div>
+            </div>
           </div>
           
           {showTagManager && (
@@ -674,18 +758,18 @@ export default function TodoApp() {
               <div className="flex items-center justify-between mb-4">
                 <h3 className={`font-medium ${textClass}`}>Manage Tags</h3>
                 <button onClick={() => setShowTagManager(false)} className={subtextClass}>
-                  <X size={20} />
+                  <X size={18} />
                 </button>
               </div>
               <div className="flex flex-wrap gap-2 mb-4">
                 {tags.map(tag => (
-                  <div key={tag} className="flex items-center gap-1 px-3 py-1 bg-slate-100 dark:bg-slate-700 rounded-full">
-                    <span className="text-sm">{tag}</span>
+                  <div key={tag} className="flex items-center gap-1 px-2 py-1 bg-slate-100 dark:bg-slate-700 rounded-full text-sm">
+                    <span>{tag}</span>
                     <button 
                       onClick={() => setTags(tags.filter(t => t !== tag))}
                       className="text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
                     >
-                      <X size={14} />
+                      <X size={12} />
                     </button>
                   </div>
                 ))}
@@ -704,7 +788,7 @@ export default function TodoApp() {
                 />
                 <button
                   onClick={addNewTag}
-                  className="px-4 py-2 bg-blue-500 text-white rounded-lg font-medium hover:bg-blue-600 transition-all duration-200"
+                  className="px-3 py-2 bg-blue-500 text-white rounded-lg font-medium hover:bg-blue-600 transition-all duration-200 text-sm"
                 >
                   Add
                 </button>
@@ -712,26 +796,26 @@ export default function TodoApp() {
             </div>
           )}
         
-          <div className="flex flex-col lg:flex-row gap-4">
-            <div className="flex gap-4 flex-1">
+          <div className="flex flex-col lg:flex-row gap-3 md:gap-4">
+            <div className="flex flex-col sm:flex-row gap-3 md:gap-4 flex-1">
               <div className="relative">
                 <select
                   value={selectedCategory}
                   onChange={(e) => setSelectedCategory(e.target.value)}
-                  className={`pl-10 pr-8 py-3 border appearance-none ${
+                  className={`pl-10 pr-8 py-2 md:py-3 border appearance-none ${
                     darkMode 
                       ? 'bg-slate-700 border-slate-600 text-slate-200' 
                       : 'bg-white border-slate-300 text-slate-800'
-                  } rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200`}
+                  } rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200 w-full`}
                 >
                   {categories.map(cat => (
                     <option key={cat.id} value={cat.id}>{cat.name}</option>
                   ))}
                 </select>
-                <div className="absolute left-3 top-3.5 pointer-events-none">
+                <div className="absolute left-3 top-2.5 md:top-3.5 pointer-events-none">
                   {categories.find(c => c.id === selectedCategory)?.icon}
                 </div>
-                <ChevronDown size={16} className={`absolute right-3 top-4 pointer-events-none ${subtextClass}`} />
+                <ChevronDown size={16} className={`absolute right-3 top-2.5 md:top-3.5 pointer-events-none ${subtextClass}`} />
               </div>
               
               <input
@@ -740,7 +824,7 @@ export default function TodoApp() {
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="Enter a new task..."
-                className={`flex-1 px-4 py-3 border ${
+                className={`flex-1 px-4 py-2 md:py-3 border ${
                   darkMode 
                     ? 'bg-slate-700 border-slate-600 text-slate-200 placeholder-slate-400' 
                     : 'bg-white border-slate-300 text-slate-800 placeholder-slate-500'
@@ -749,73 +833,73 @@ export default function TodoApp() {
             </div>
             <button
               onClick={addTask}
-              className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-lg font-medium hover:from-blue-700 hover:to-indigo-800 transition-all duration-200 flex items-center gap-2 hover:scale-105 shadow-lg"
+              className="px-4 py-2 md:px-6 md:py-3 bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-lg font-medium hover:from-blue-700 hover:to-indigo-800 transition-all duration-200 flex items-center justify-center gap-2 hover:scale-105 shadow-lg text-sm md:text-base"
             >
-              <Plus size={20} />
-              Add Task
+              <Plus size={18} />
+              <span>Add Task</span>
             </button>
           </div>
         </div>
 
 
         {showPomodoro && (
-          <div className={`${cardClass} rounded-xl shadow-lg border p-6 mb-6 backdrop-blur-sm`}>
-            <div className="flex items-center justify-between mb-6">
-              <h2 className={`text-xl font-semibold ${textClass} flex items-center gap-2`}>
-                <Clock4 size={24} className="text-blue-500" />
+          <div className={`${cardClass} rounded-xl shadow-lg border p-4 md:p-6 mb-6 backdrop-blur-sm`}>
+            <div className="flex items-center justify-between mb-4 md:mb-6">
+              <h2 className={`text-lg md:text-xl font-semibold ${textClass} flex items-center gap-2`}>
+                <Clock4 size={20} className="text-blue-500" />
                 Pomodoro Timer
               </h2>
               <div className="flex items-center gap-2">
                 <button 
                   onClick={() => setShowPomodoro(false)}
-                  className={`p-2 rounded-lg ${buttonClass}`}
+                  className={`p-1 md:p-2 rounded-lg ${buttonClass}`}
                 >
-                  <Minimize2 size={16} />
+                  <Minimize2 size={14} />
                 </button>
               </div>
             </div>
             
-            <div className="flex flex-col items-center justify-center mb-6">
-              <div className={`text-6xl font-mono font-bold mb-4 ${pomodoroType === 'work' ? 'text-blue-600' : 'text-green-600'}`}>
+            <div className="flex flex-col items-center justify-center mb-4 md:mb-6">
+              <div className={`text-4xl md:text-5xl lg:text-6xl font-mono font-bold mb-4 ${pomodoroType === 'work' ? 'text-blue-600' : 'text-green-600'}`}>
                 {formatPomodoroTime(pomodoroTime)}
               </div>
-              <div className={`text-lg font-medium mb-6 ${subtextClass}`}>
+              <div className={`text-base md:text-lg font-medium mb-4 md:mb-6 ${subtextClass}`}>
                 {pomodoroType === 'work' ? 'Focus Time' : 'Break Time'}
               </div>
               
-              <div className="flex gap-4">
+              <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
                 {pomodoroActive ? (
                   <button
                     onClick={pausePomodoro}
-                    className="px-6 py-3 bg-red-500 text-white rounded-lg font-medium hover:bg-red-600 transition-all duration-200 flex items-center gap-2"
+                    className="px-4 py-2 md:px-6 md:py-3 bg-red-500 text-white rounded-lg font-medium hover:bg-red-600 transition-all duration-200 flex items-center justify-center gap-2 text-sm md:text-base"
                   >
-                    <Pause size={20} />
+                    <Pause size={16} />
                     Pause
                   </button>
                 ) : (
                   <button
                     onClick={startPomodoro}
-                    className="px-6 py-3 bg-green-500 text-white rounded-lg font-medium hover:bg-green-600 transition-all duration-200 flex items-center gap-2"
+                    className="px-4 py-2 md:px-6 md:py-3 bg-green-500 text-white rounded-lg font-medium hover:bg-green-600 transition-all duration-200 flex items-center justify-center gap-2 text-sm md:text-base"
                   >
-                    <Play size={20} />
+                    <Play size={16} />
                     Start
                   </button>
                 )}
                 <button
                   onClick={resetPomodoro}
-                  className="px-6 py-3 bg-slate-500 text-white rounded-lg font-medium hover:bg-slate-600 transition-all duration-200 flex items-center gap-2"
+                  className="px-4 py-2 md:px-6 md:py-3 bg-slate-500 text-white rounded-lg font-medium hover:bg-slate-600 transition-all duration-200 flex items-center justify-center gap-2 text-sm md:text-base"
                 >
-                  <RotateCcw size={20} />
+                  <RotateCcw size={16} />
                   Reset
                 </button>
               </div>
             </div>
             
             <div className="text-center">
-              <div className={`text-sm ${subtextClass} mb-2`}>Completed Pomodoros</div>
+              <div className={`text-xs md:text-sm ${subtextClass} mb-2`}>Completed Pomodoros</div>
               <div className="flex justify-center gap-1">
                 {Array.from({ length: Math.min(pomodoroCompleted, 10) }).map((_, i) => (
-                  <div key={i} className="w-3 h-3 bg-green-500 rounded-full"></div>
+                  <div key={i} className="w-2 h-2 md:w-3 md:h-3 bg-green-500 rounded-full"></div>
                 ))}
                 {pomodoroCompleted > 10 && (
                   <div className="text-xs text-slate-500">+{pomodoroCompleted - 10}</div>
@@ -826,41 +910,43 @@ export default function TodoApp() {
         )}
 
         <div className={`${cardClass} rounded-xl shadow-lg border backdrop-blur-sm`}>
-          <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-700">
-            <h2 className={`text-xl font-semibold ${textClass}`}>
+          <div className="flex items-center justify-between p-4 md:p-6 border-b border-slate-200 dark:border-slate-700">
+            <h2 className={`text-lg md:text-xl font-semibold ${textClass}`}>
               Tasks ({filteredTasks.length})
             </h2>
-            <div className="flex items-center gap-4">
-              <button
-                onClick={() => setShowPomodoro(!showPomodoro)}
-                className={`p-2 rounded-lg ${buttonClass}`}
-              >
-                <Clock4 size={20} />
-              </button>
-              <button
-                onClick={() => setShowAnalytics(!showAnalytics)}
-                className={`p-2 rounded-lg ${buttonClass}`}
-              >
-                <PieChart size={20} />
-              </button>
-              <button
-                onClick={() => setShowCategories(!showCategories)}
-                className={`p-2 rounded-lg ${buttonClass}`}
-              >
-                <FolderOpen size={20} />
-              </button>
-            </div>
+            {!isMobile && (
+              <div className="flex items-center gap-3 md:gap-4">
+                <button
+                  onClick={() => setShowPomodoro(!showPomodoro)}
+                  className={`p-2 rounded-lg ${buttonClass}`}
+                >
+                  <Clock4 size={18} />
+                </button>
+                <button
+                  onClick={() => setShowAnalytics(!showAnalytics)}
+                  className={`p-2 rounded-lg ${buttonClass}`}
+                >
+                  <PieChart size={18} />
+                </button>
+                <button
+                  onClick={() => setShowCategories(!showCategories)}
+                  className={`p-2 rounded-lg ${buttonClass}`}
+                >
+                  <FolderOpen size={18} />
+                </button>
+              </div>
+            )}
           </div>
           
           {filteredTasks.length === 0 ? (
-            <div className="p-16 text-center">
-              <div className={`w-16 h-16 mx-auto mb-4 rounded-full ${darkMode ? 'bg-slate-700' : 'bg-slate-100'} flex items-center justify-center`}>
-                <Target size={24} className={subtextClass} />
+            <div className="p-8 md:p-16 text-center">
+              <div className={`w-12 h-12 md:w-16 md:h-16 mx-auto mb-4 rounded-full ${darkMode ? 'bg-slate-700' : 'bg-slate-100'} flex items-center justify-center`}>
+                <Target size={20} className={subtextClass} />
               </div>
-              <h3 className={`${subtextClass} text-lg font-medium mb-2`}>
+              <h3 className={`${subtextClass} text-base md:text-lg font-medium mb-2`}>
                 {searchTerm || filter !== 'all' || selectedTags.length > 0 ? 'No tasks match your criteria' : 'No tasks yet'}
               </h3>
-              <p className={subtextClass}>
+              <p className={`${subtextClass} text-sm md:text-base`}>
                 {searchTerm || filter !== 'all' || selectedTags.length > 0 ? 'Try adjusting your search or filter' : 'Create your first task to get started'}
               </p>
             </div>
@@ -869,7 +955,7 @@ export default function TodoApp() {
               {filteredTasks.map((task) => (
                 <div
                   key={task.id}
-                  className={`group flex items-center gap-4 p-6 transition-all duration-300 ${
+                  className={`group flex items-center gap-3 md:gap-4 p-4 md:p-6 transition-all duration-300 ${
                     darkMode ? 'hover:bg-slate-700/30' : 'hover:bg-slate-50'
                   } ${task.completed ? 'opacity-60' : ''} ${
                     activeTimer === task.id ? 
@@ -882,13 +968,13 @@ export default function TodoApp() {
                     className="flex-shrink-0 transition-transform duration-200 hover:scale-110"
                   >
                     {task.completed ? (
-                      <CheckCircle2 size={24} className="text-green-500" />
+                      <CheckCircle2 size={20} className="text-green-500" />
                     ) : (
-                      <Circle size={24} className={`${darkMode ? 'text-slate-500 hover:text-slate-400' : 'text-slate-400 hover:text-slate-600'}`} />
+                      <Circle size={20} className={`${darkMode ? 'text-slate-500 hover:text-slate-400' : 'text-slate-400 hover:text-slate-600'}`} />
                     )}
                   </button>
                   
-                  <div className="flex-1">
+                  <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
                       {editingTaskId === task.id ? (
                         <div className="flex items-center gap-2 flex-1">
@@ -896,30 +982,30 @@ export default function TodoApp() {
                             type="text"
                             value={editText}
                             onChange={(e) => setEditText(e.target.value)}
-                            className={`flex-1 px-3 py-1 border ${
+                            className={`flex-1 px-2 py-1 border ${
                               darkMode 
                                 ? 'bg-slate-700 border-slate-600 text-slate-200' 
                                 : 'bg-white border-slate-300 text-slate-800'
-                            } rounded focus:outline-none focus:ring-1 focus:ring-blue-500`}
+                            } rounded focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm md:text-base`}
                             autoFocus
                           />
                           <button
                             onClick={() => saveEdit(task.id)}
                             className="p-1 text-green-500 hover:text-green-600"
                           >
-                            <CheckCircle2 size={18} />
+                            <CheckCircle2 size={16} />
                           </button>
                           <button
                             onClick={cancelEdit}
                             className="p-1 text-red-500 hover:text-red-600"
                           >
-                            <X size={18} />
+                            <X size={16} />
                           </button>
                         </div>
                       ) : (
                         <>
                           <div
-                            className={`text-lg cursor-pointer select-none transition-colors duration-200 ${
+                            className={`text-base md:text-lg cursor-pointer select-none transition-colors duration-200 truncate ${
                               task.completed
                                 ? `${darkMode ? 'text-slate-500' : 'text-slate-500'} line-through`
                                 : `${textClass} ${darkMode ? 'hover:text-slate-300' : 'hover:text-slate-600'}`
@@ -929,27 +1015,27 @@ export default function TodoApp() {
                             {task.text}
                           </div>
                           {task.starred && (
-                            <Star size={16} className="text-amber-500 fill-current" />
+                            <Star size={16} className="text-amber-500 fill-current flex-shrink-0" />
                           )}
                         </>
                       )}
                     </div>
                     
-                    <div className={`flex items-center gap-4 text-sm ${subtextClass} mb-2`}>
+                    <div className={`flex flex-wrap items-center gap-2 md:gap-4 text-xs md:text-sm ${subtextClass} mb-2`}>
                       <div className="flex items-center gap-1">
-                        <Clock size={14} />
+                        <Clock size={12} />
                         <span>{formatTime(task.timeSpent || 0)}</span>
                       </div>
                       <div className="flex items-center gap-1">
-                        <div className={`w-3 h-3 rounded-full ${categories.find(c => c.id === task.category)?.color || 'bg-gray-500'}`}></div>
+                        <div className={`w-2 h-2 md:w-3 md:h-3 rounded-full ${categories.find(c => c.id === task.category)?.color || 'bg-gray-500'}`}></div>
                         <span>{categories.find(c => c.id === task.category)?.name || 'Work'}</span>
                       </div>
                       {task.priority && task.priority !== 'medium' && (
-                        <div className={`px-2 py-0.5 rounded-full text-xs ${priorityOptions.find(p => p.id === task.priority)?.color}`}>
+                        <div className={`px-1.5 py-0.5 rounded-full text-xs ${priorityOptions.find(p => p.id === task.priority)?.color}`}>
                           {priorityOptions.find(p => p.id === task.priority)?.name}
                         </div>
                       )}
-                      <span>Created {task.createdAt?.toLocaleDateString()}</span>
+                      <span className="hidden sm:inline">Created {task.createdAt?.toLocaleDateString()}</span>
                     </div>
                    
                     {task.tags && task.tags.length > 0 && (
@@ -957,15 +1043,15 @@ export default function TodoApp() {
                         {task.tags.map(tag => (
                           <span 
                             key={tag}
-                            className="px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-full text-xs flex items-center gap-1"
+                            className="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-full text-xs flex items-center gap-1"
                           >
-                            <Tag size={12} />
+                            <Tag size={10} />
                             {tag}
                             <button 
                               onClick={() => removeTagFromTask(task.id, tag)}
                               className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
                             >
-                              <X size={12} />
+                              <X size={10} />
                             </button>
                           </span>
                         ))}
@@ -974,7 +1060,7 @@ export default function TodoApp() {
                     
                     {/* Subtasks */}
                     {task.subtasks && task.subtasks.length > 0 && (
-                      <div className="mt-2 pl-4 border-l border-slate-200 dark:border-slate-700">
+                      <div className="mt-2 pl-3 border-l border-slate-200 dark:border-slate-700">
                         {task.subtasks.map(subtask => (
                           <div key={subtask.id} className="flex items-center gap-2 mb-1">
                             <button
@@ -982,19 +1068,19 @@ export default function TodoApp() {
                               className="flex-shrink-0"
                             >
                               {subtask.completed ? (
-                                <CheckSquare size={16} className="text-green-500" />
+                                <CheckSquare size={14} className="text-green-500" />
                               ) : (
-                                <Square size={16} className="text-slate-400" />
+                                <Square size={14} className="text-slate-400" />
                               )}
                             </button>
-                            <span className={`text-sm ${subtask.completed ? 'line-through text-slate-400' : 'text-slate-600 dark:text-slate-300'}`}>
+                            <span className={`text-xs md:text-sm ${subtask.completed ? 'line-through text-slate-400' : 'text-slate-600 dark:text-slate-300'} truncate`}>
                               {subtask.text}
                             </span>
                             <button
                               onClick={() => deleteSubtask(task.id, subtask.id)}
                               className="ml-auto text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
                             >
-                              <X size={14} />
+                              <X size={12} />
                             </button>
                           </div>
                         ))}
@@ -1002,139 +1088,139 @@ export default function TodoApp() {
                     )}
                   </div>
                   
-                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all duration-300">
+                  <div className="flex items-center gap-1 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-all duration-300 flex-shrink-0">
                     <button
                       onClick={() => toggleStar(task.id)}
-                      className={`p-2 rounded-lg transition-colors duration-200 ${
+                      className={`p-1.5 md:p-2 rounded-lg transition-colors duration-200 ${
                         task.starred 
                           ? 'text-amber-500 bg-amber-100 dark:bg-amber-900/30' 
                           : `${darkMode ? 'bg-slate-700 text-slate-400 hover:bg-slate-600' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`
                       }`}
                     >
-                      <Star size={16} className={task.starred ? 'fill-current' : ''} />
+                      <Star size={14} className={task.starred ? 'fill-current' : ''} />
                     </button>
                     
                     {!task.completed && (
                       <>
                         <button
                           onClick={() => toggleTimer(task.id)}
-                          className={`p-2 rounded-lg transition-colors duration-200 ${
+                          className={`p-1.5 md:p-2 rounded-lg transition-colors duration-200 ${
                             activeTimer === task.id
                               ? `${darkMode ? 'bg-blue-600 text-slate-200 hover:bg-blue-500' : 'bg-blue-100 text-blue-700 hover:bg-blue-200'}`
                               : `${darkMode ? 'bg-slate-700 text-slate-400 hover:bg-slate-600' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`
                           }`}
                         >
                           {activeTimer === task.id ? (
-                            <Pause size={16} />
+                            <Pause size={14} />
                           ) : (
-                            <Play size={16} />
+                            <Play size={14} />
                           )}
                         </button>
                         
                         <button
                           onClick={() => resetTimer(task.id)}
-                          className={`p-2 rounded-lg transition-colors duration-200 ${
+                          className={`p-1.5 md:p-2 rounded-lg transition-colors duration-200 ${
                             darkMode ? 'bg-slate-700 text-slate-400 hover:bg-slate-600' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                           }`}
                         >
-                          <RotateCcw size={16} />
+                          <RotateCcw size={14} />
                         </button>
                       </>
                     )}
                     
                     <button
                       onClick={() => startEditing(task)}
-                      className={`p-2 rounded-lg transition-colors duration-200 ${
+                      className={`p-1.5 md:p-2 rounded-lg transition-colors duration-200 ${
                         darkMode ? 'bg-slate-700 text-slate-400 hover:bg-slate-600' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                       }`}
                     >
-                      <Edit3 size={16} />
+                      <Edit3 size={14} />
                     </button>
                     
                     <button
                       onClick={() => archiveTask(task.id)}
-                      className={`p-2 rounded-lg transition-colors duration-200 ${
+                      className={`p-1.5 md:p-2 rounded-lg transition-colors duration-200 ${
                         darkMode ? 'bg-slate-700 text-slate-400 hover:bg-slate-600' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                       }`}
                     >
-                      <Archive size={16} />
+                      <Archive size={14} />
                     </button>
                     
                     <button
                       onClick={() => deleteTask(task.id)}
-                      className={`p-2 rounded-lg transition-colors duration-200 ${
+                      className={`p-1.5 md:p-2 rounded-lg transition-colors duration-200 ${
                         darkMode ? 'bg-slate-700 text-slate-400 hover:bg-slate-600 hover:text-slate-300' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-800'
                       }`}
                     >
-                      <Trash2 size={16} />
+                      <Trash2 size={14} />
                     </button>
                     
                     <button
                       onClick={() => setShowTaskDetails(showTaskDetails === task.id ? null : task.id)}
-                      className={`p-2 rounded-lg transition-colors duration-200 ${
+                      className={`p-1.5 md:p-2 rounded-lg transition-colors duration-200 ${
                         darkMode ? 'bg-slate-700 text-slate-400 hover:bg-slate-600' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                       }`}
                     >
-                      <MoreHorizontal size={16} />
+                      <MoreHorizontal size={14} />
                     </button>
                   </div>
                 </div>
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 p-4 md:p-6">
               {filteredTasks.map((task) => (
                 <div
                   key={task.id}
-                  className={`rounded-lg border p-4 transition-all duration-300 ${
+                  className={`rounded-lg border p-3 md:p-4 transition-all duration-300 ${
                     darkMode ? 'bg-slate-800 border-slate-700 hover:bg-slate-700/50' : 'bg-white border-slate-200 hover:bg-slate-50'
                   } ${task.completed ? 'opacity-60' : ''}`}
                 >
                   <div className="flex items-start justify-between mb-3">
                     <button
                       onClick={() => toggleTask(task.id)}
-                      className="flex-shrink-0 mt-1 transition-transform duration-200 hover:scale-110"
+                      className="flex-shrink-0 mt-0.5 transition-transform duration-200 hover:scale-110"
                     >
                       {task.completed ? (
-                        <CheckCircle2 size={20} className="text-green-500" />
+                        <CheckCircle2 size={18} className="text-green-500" />
                       ) : (
-                        <Circle size={20} className="text-slate-400" />
+                        <Circle size={18} className="text-slate-400" />
                       )}
                     </button>
                     
                     <div className="flex items-center gap-1">
                       {task.starred && (
-                        <Star size={16} className="text-amber-500 fill-current" />
+                        <Star size={14} className="text-amber-500 fill-current" />
                       )}
                       <button
                         onClick={() => setShowTaskDetails(showTaskDetails === task.id ? null : task.id)}
                         className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
                       >
-                        <MoreHorizontal size={16} />
+                        <MoreHorizontal size={14} />
                       </button>
                     </div>
                   </div>
                   
                   <div
-                    className={`mb-3 cursor-pointer ${task.completed ? 'line-through text-slate-400' : textClass}`}
+                    className={`mb-3 cursor-pointer text-sm md:text-base ${task.completed ? 'line-through text-slate-400' : textClass}`}
                     onClick={() => toggleTask(task.id)}
                   >
                     {task.text}
                   </div>
                   
                   <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-1 text-sm text-slate-500">
-                      <Clock size={14} />
+                    <div className="flex items-center gap-1 text-xs md:text-sm text-slate-500">
+                      <Clock size={12} />
                       <span>{formatTime(task.timeSpent || 0)}</span>
                     </div>
                     
-                    <div className={`w-3 h-3 rounded-full ${categories.find(c => c.id === task.category)?.color || 'bg-gray-500'}`}></div>
+                    <div className={`w-2 h-2 md:w-3 md:h-3 rounded-full ${categories.find(c => c.id === task.category)?.color || 'bg-gray-500'}`}></div>
                   </div>
                   
                   <div className="flex items-center justify-between">
                     <button
                       onClick={() => toggleTimer(task.id)}
-                      className={`px-3 py-1 rounded text-sm ${
+                      className={`px-2 py-1 rounded text-xs md:text-sm ${
                         activeTimer === task.id
                           ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
                           : 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300'
@@ -1144,7 +1230,7 @@ export default function TodoApp() {
                     </button>
                     
                     {task.priority && task.priority !== 'medium' && (
-                      <div className={`px-2 py-0.5 rounded-full text-xs ${priorityOptions.find(p => p.id === task.priority)?.color}`}>
+                      <div className={`px-1.5 py-0.5 rounded-full text-xs ${priorityOptions.find(p => p.id === task.priority)?.color}`}>
                         {priorityOptions.find(p => p.id === task.priority)?.name}
                       </div>
                     )}
@@ -1159,16 +1245,16 @@ export default function TodoApp() {
       {showSettings && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className={`${cardClass} rounded-xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto`}>
-            <div className="p-6 border-b border-slate-200 dark:border-slate-700">
+            <div className="p-4 md:p-6 border-b border-slate-200 dark:border-slate-700">
               <div className="flex items-center justify-between mb-4">
-                <h2 className={`text-xl font-semibold ${textClass}`}>Settings</h2>
+                <h2 className={`text-lg md:text-xl font-semibold ${textClass}`}>Settings</h2>
                 <button onClick={() => setShowSettings(false)} className={subtextClass}>
-                  <X size={24} />
+                  <X size={20} />
                 </button>
               </div>
             </div>
             
-            <div className="p-6 space-y-6">
+            <div className="p-4 md:p-6 space-y-6">
               <div>
                 <h3 className={`font-medium ${textClass} mb-3`}>Appearance</h3>
                 <div className="flex items-center justify-between mb-4">
@@ -1209,14 +1295,14 @@ export default function TodoApp() {
                 <h3 className={`font-medium ${textClass} mb-3`}>Data</h3>
                 <button
                   onClick={exportTasks}
-                  className={`w-full py-3 rounded-lg mb-3 flex items-center justify-center gap-2 ${buttonClass}`}
+                  className={`w-full py-2 md:py-3 rounded-lg mb-3 flex items-center justify-center gap-2 ${buttonClass} text-sm md:text-base`}
                 >
-                  <Download size={18} />
+                  <Download size={16} />
                   Export Tasks
                 </button>
                 
-                <label className={`w-full py-3 rounded-lg flex items-center justify-center gap-2 ${buttonClass} cursor-pointer`}>
-                  <Upload size={18} />
+                <label className={`w-full py-2 md:py-3 rounded-lg flex items-center justify-center gap-2 ${buttonClass} text-sm md:text-base cursor-pointer`}>
+                  <Upload size={16} />
                   Import Tasks
                   <input type="file" accept=".json" onChange={importTasks} className="hidden" />
                 </label>
@@ -1238,35 +1324,35 @@ export default function TodoApp() {
 
     
       {achievements.length > 0 && (
-        <div className="fixed bottom-4 right-4 z-40">
-          <div className={`${cardClass} rounded-lg shadow-lg p-4 max-w-xs`}>
+        <div className="fixed bottom-4 right-4 left-4 sm:left-auto z-40">
+          <div className={`${cardClass} rounded-lg shadow-lg p-3 md:p-4 max-w-xs mx-auto sm:mx-0`}>
             <div className="flex items-center gap-2 mb-2">
-              <Trophy size={18} className="text-amber-500" />
-              <h3 className={`font-medium ${textClass}`}>Achievements Unlocked</h3>
+              <Trophy size={16} className="text-amber-500" />
+              <h3 className={`font-medium ${textClass} text-sm md:text-base`}>Achievements Unlocked</h3>
             </div>
             <div className="space-y-2">
               {achievements.includes('first_task') && (
                 <div className="flex items-center gap-2">
-                  <Award size={14} className="text-blue-500" />
-                  <span className={`text-sm ${subtextClass}`}>First Task - Created your first task</span>
+                  <Award size={12} className="text-blue-500" />
+                  <span className={`text-xs ${subtextClass}`}>First Task - Created your first task</span>
                 </div>
               )}
               {achievements.includes('task_completed') && (
                 <div className="flex items-center gap-2">
-                  <Award size={14} className="text-green-500" />
-                  <span className={`text-sm ${subtextClass}`}>Task Master - Completed your first task</span>
+                  <Award size={12} className="text-green-500" />
+                  <span className={`text-xs ${subtextClass}`}>Task Master - Completed your first task</span>
                 </div>
               )}
               {achievements.includes('productivity_expert') && (
                 <div className="flex items-center gap-2">
-                  <Award size={14} className="text-purple-500" />
-                  <span className={`text-sm ${subtextClass}`}>Productivity Expert - Completed 10 tasks</span>
+                  <Award size={12} className="text-purple-500" />
+                  <span className={`text-xs ${subtextClass}`}>Productivity Expert - Completed 10 tasks</span>
                 </div>
               )}
               {achievements.includes('pomodoro_master') && (
                 <div className="flex items-center gap-2">
-                  <Award size={14} className="text-red-500" />
-                  <span className={`text-sm ${subtextClass}`}>Pomodoro Master - Completed a pomodoro session</span>
+                  <Award size={12} className="text-red-500" />
+                  <span className={`text-xs ${subtextClass}`}>Pomodoro Master - Completed a pomodoro session</span>
                 </div>
               )}
             </div>
